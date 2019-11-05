@@ -25,7 +25,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const i18n = require('./lib/i18Configure')();
 app.use(i18n.init);
 
-i18
+
 console.log(i18n.__('EXAMPLE'));
 
 /**
