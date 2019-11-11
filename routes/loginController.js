@@ -43,6 +43,10 @@ class LoginController {
       };
 
       res.redirect('/privado');
+
+      const result = await usuario.sendEmail('admin@example.com', 'Prueba email', 'Has entrado en<b>NodeAPI</b>');
+      console.log(result);
+
     } catch(err) {
       next(err);
     }

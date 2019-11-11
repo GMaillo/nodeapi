@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
 
 var app = express();
 
@@ -33,7 +34,7 @@ app.use(i18n.init);
 /**
  * Conexión con la base de datos
  */
-require('./lib/connectMongoose');
+const mongooseConnection = require('./lib/connectMongoose');
 require('./models/Agente');
 
 app.use((req, res, next) => {
@@ -66,8 +67,18 @@ app.use(session({
   cookie: {
     secure: true, // solo mandar por HTTPS
     maxAge: 1000 * 60 * 60 * 24 * 2 // caducar a los 2 días de inactividad
-  }
+  },
+  store: new MongoStore({
+    // le pasamos como conectarse a la base de datos
+    mongooseConnection: mongooseConnection
+  })
 }));
+
+// middleware para tener acceso a la sesión en las vistas
+app.use((req, res, next) => {
+  res.locals.session = req.session;
+  next();
+})
 
 /**
  * Rutas de mi aplicación web

@@ -4,6 +4,8 @@
 
 *MongoDB
 
+Make a copy of .env.example to .env and review the values
+
 ## API Methods
 
 ### Agents list
