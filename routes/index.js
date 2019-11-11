@@ -9,7 +9,7 @@ router.get('/', function(req, res, next) {
 
   const segundo = (new Date()).getSeconds();
 
-  res.locals.valor = '<script>alert("inyeccion de codigo")</script>';
+  res.locals.valor = `<script>alert("${res.__('inyeccion de codigo')}")</script>`;
   res.locals.condicion = {
     segundo: segundo,
     estado: segundo % 2 === 0 // es par

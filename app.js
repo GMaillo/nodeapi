@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const session = require('express-session');
 
 var app = express();
 
@@ -19,14 +20,15 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 //app.use('/pdf', express.static(path.join(__dirname, '/mnt/sda3/images/pdfs')));
 
+
+
 /**
  * Setup de i18n
  */
-const i18n = require('./lib/i18Configure')();
+const i18n = require('./lib/i18nConfigure')();
 app.use(i18n.init);
 
-
-console.log(i18n.__('EXAMPLE'));
+// console.log(i18n.__('EXAMPLE'));
 
 /**
  * Conexión con la base de datos
@@ -54,10 +56,37 @@ app.use('/apiv1/agentes', require('./routes/apiv1/agentes'));
 app.locals.title = 'NodeAPI';
 
 /**
+ * Inicializamos y cargamos las sesion del usuario que hace la petición
+ */
+app.use(session({
+  name: 'nodeapi-session',
+  secret: 'kshd fsa78f6sd78f6s8d7f6dsa8fsjghdagfjhasdfs78',
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    secure: true, // solo mandar por HTTPS
+    maxAge: 1000 * 60 * 60 * 24 * 2 // caducar a los 2 días de inactividad
+  }
+}));
+
+/**
  * Rutas de mi aplicación web
  */
-app.use('/',        require('./routes/index'));
-app.use('/users',   require('./routes/users'));
+
+const sessionAuth = require('./lib/sessionAuth');
+const loginController = require('./routes/loginController');
+const privadoController = require('./routes/privadoController');
+
+app.use('/',         require('./routes/index'));
+app.use('/services', require('./routes/services'));
+app.use('/change-locale', require('./routes/change-locale'));
+app.use('/users',    require('./routes/users'));
+// usamos el estilo de COntroladores para estructurar las rutas siguientes:
+app.get('/login', loginController.index);
+app.post('/login', loginController.post);
+app.get('/logout', loginController.logout);
+//  sessionAuth('admin') --> devulveme un middleware que valide el rol admin
+app.get('/privado', sessionAuth('admin'), privadoController.index);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
